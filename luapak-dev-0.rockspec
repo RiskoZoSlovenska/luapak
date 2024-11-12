@@ -28,6 +28,7 @@ dependencies = {
   'depgraph ~> 0.2',
   'lua-glob-pattern ~> 0.2',
   'luafilesystem ~> 1',
+  'luarocks ~> 3',
   'luasrcdiet ~> 1',
   'optparse ~> 1',
 }
