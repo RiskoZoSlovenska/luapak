@@ -1,11 +1,12 @@
 ---------
 -- Implementation of the @{build.toolchain}'s functions for MSVC.
 ----
-local utils = require 'luapak.build.toolchain.utils'
+local utils = require 'luapak.utils'
+local toolchain_utils = require 'luapak.build.toolchain.utils'
 
 local check_args = utils.check_args
-local execute = utils.execute
-local push_flags = utils.push_flags
+local execute = toolchain_utils.execute
+local push_flags = toolchain_utils.push_flags
 local unpack = table.unpack
 
 
