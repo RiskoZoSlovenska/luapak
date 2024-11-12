@@ -24,12 +24,12 @@ with Lua library and native extensions.]],
 
 dependencies = {
   'lua >= 5.1',
-  'brieflz ~> 0.1.2',
-  'depgraph ~> 0.1',
+  'brieflz ~> 0.2',
+  'depgraph ~> 0.2',
   'lua-glob-pattern ~> 0.2',
-  'luafilesystem ~> 1.6',
-  'luasrcdiet ~> 0.3',
-  'optparse ~> 1.1',
+  'luafilesystem ~> 1',
+  'luasrcdiet ~> 1',
+  'optparse ~> 1',
 }
 
 build = {
