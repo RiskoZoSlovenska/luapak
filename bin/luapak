@@ -69,7 +69,10 @@ local module = require('luapak.cli.'..commands[command])
 local arg = shallow_clone(_G.arg)
 table.remove(arg, 1)
 
-local ok, err = xpcall(module, opts.verbose and debug.traceback or function(a) return a end, arg)
+local runner = function()
+  return module(arg)
+end
+local ok, err = xpcall(runner, opts.verbose and debug.traceback or function(a) return a end)
 if not ok then
   if not opts.verbose then
     err = err:gsub('^[^:]+:[^:]+:%s*', '')  -- remove location info
