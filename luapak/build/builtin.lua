@@ -1,13 +1,15 @@
 ---------
 -- The builtin builder based on LuaRocks builtin.
 ----
-local cfg = require 'luarocks.cfg'
+local cfg = require 'luarocks.core.cfg'
 local dir = require 'luarocks.dir'
 local fs = require 'luarocks.fs'
 local path = require 'luarocks.path'
 
 local utils = require 'luapak.utils'
 local toolchain = require 'luapak.build.toolchain.init'
+
+fs.init()
 
 local base_name = dir.base_name
 local check_args = utils.check_args
@@ -151,11 +153,11 @@ function M.create_builder (compile_object, create_library)
       end
     end
 
-    do local ok, err = install_files(lua_modules, '0644')
+    do local ok, err = install_files(lua_modules, 'read')
       if not ok then return nil, err end
     end
 
-    do local ok, err = install_files(native_modules, '0755')
+    do local ok, err = install_files(native_modules, 'exec')
       if not ok then return nil, err end
     end
 

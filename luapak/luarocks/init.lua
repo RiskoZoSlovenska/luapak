@@ -1,7 +1,6 @@
 ---------
 -- Facade for interaction with LuaRocks.
 ----
-require 'luapak.luarocks.site_config'
 require 'luapak.luarocks.cfg_extra'
 package.loaded['luarocks.build.builtin'] = require 'luapak.build.builtin'
 
@@ -12,7 +11,7 @@ for _, name in ipairs { 'cmake', 'command', 'make' } do
   package.loaded[name] = warn_interceptor(require(name))
 end
 
-local cfg = require 'luarocks.cfg'
+local cfg = require 'luarocks.core.cfg'
 local build = require 'luarocks.build'
 local fetch = require 'luarocks.fetch'
 local fs = require 'luarocks.fs'
@@ -20,6 +19,8 @@ local path = require 'luarocks.path'
 local util = require 'luarocks.util'
 
 local const = require 'luapak.luarocks.constants'
+
+fs.init()
 
 
 local function run_in_dir (dir, func, ...)
@@ -40,15 +41,38 @@ local M = {}
 M.cfg = cfg
 
 --- Do we run on Windows?
-M.is_windows = cfg.platforms.windows
+M.is_windows = cfg.is_platform("windows")
+
+
+local function build_rockspec(rockspec_file)
+  local rockspec, err, errcode = fetch.load_rockspec(rockspec_file)
+  if err then
+     return nil, err, errcode
+  elseif not rockspec.build then
+     return nil, "Rockspec error: build table not specified"
+  elseif not rockspec.build.type then
+     return nil, "Rockspec error: build type not specified"
+  end
+
+  return build.build_rockspec(rockspec, build.opts{
+    need_to_fetch = false,
+    minimal_mode = true,
+    deps_mode = "one",
+    build_only_deps = false,
+    verify = false,
+    check_lua_versions = false,
+    pin = false,
+    rebuild = false,
+    no_install = false,
+ })
+end
 
 --- Builds and installs local rock specified by the rockspec.
 --
 -- @tparam string rockspec_file Path of the rockspec file.
 -- @tparam string proj_dir The base directory with the rock's sources.
 function M.build_and_install_rockspec (rockspec_file, proj_dir)
-  return run_in_dir(proj_dir,
-      build.build_rockspec, rockspec_file, false, true, 'one', false)
+  return run_in_dir(proj_dir, build_rockspec, rockspec_file)
 end
 
 --- Changes the target Lua version.
@@ -57,25 +81,13 @@ end
 -- @tparam ?string luajit_ver The LuaJIT version, or nil if target is not LuaJIT.
 function M.change_target_lua (api_ver, luajit_ver)
   cfg.lua_version = api_ver
-  cfg.luajit_version = luajit_ver
+  cfg.cache.luajit_version = luajit_ver
+  cfg.cache.luajit_version_checked = true
 
-  cfg.rocks_provided.lua = api_ver..'-1'
-  if api_ver == '5.2' then
-    cfg.rocks_provided.bit32 = '5.2-1'
-  elseif api_ver == '5.3' then
-    cfg.rocks_provided.utf8 = '5.3-1'
-  end
-
-  if luajit_ver then
-    cfg.rocks_provided.luabitop = luajit_ver:gsub('%-', '')..'-1'
-
-    if cfg.is_platform('macosx') then
-      -- See http://luajit.org/install.html#embed.
-      local ldflags = cfg.variables.LDFLAGS or ''
-      cfg.variables.LDFLAGS = const.LUAJIT_MACOS_LDFLAGS..' '..ldflags
-    end
-  else
-    cfg.rocks_provided.luabitop = nil
+  if luajit_ver and cfg.is_platform('macosx') then
+    -- See http://luajit.org/install.html#embed.
+    local ldflags = cfg.variables.LDFLAGS or ''
+    cfg.variables.LDFLAGS = const.LUAJIT_MACOS_LDFLAGS..' '..ldflags
   end
 end
 

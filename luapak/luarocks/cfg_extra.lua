@@ -1,4 +1,4 @@
-local cfg = require 'luarocks.cfg'
+local cfg = require 'luarocks.core.cfg'
 
 local const = require 'luapak.luarocks.constants'
 local fs = require 'luapak.fs'
@@ -9,6 +9,8 @@ local fmt = string.format
 local getenv = os.getenv
 local is_empty = utils.is_empty
 local starts_with = utils.starts_with
+
+cfg.init()
 
 local LUAROCKS_FAKE_PREFIX = const.LUAROCKS_FAKE_PREFIX
 local MSVC = cfg.is_platform('win32') and not cfg.is_platform('mingw32')

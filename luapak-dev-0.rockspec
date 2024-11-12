@@ -28,7 +28,6 @@ dependencies = {
   'depgraph ~> 0.1',
   'lua-glob-pattern ~> 0.2',
   'luafilesystem ~> 1.6',
-  'luarocks ~> 2.4',
   'luasrcdiet ~> 0.3',
   'optparse ~> 1.1',
 }
@@ -57,7 +56,6 @@ build = {
     ['luapak.luarocks'] = 'luapak/luarocks/init.lua',
     ['luapak.luarocks.cfg_extra'] = 'luapak/luarocks/cfg_extra.lua',
     ['luapak.luarocks.constants'] = 'luapak/luarocks/constants.lua',
-    ['luapak.luarocks.site_config'] = 'luapak/luarocks/site_config.lua',
     ['luapak.make'] = 'luapak/make.lua',
     ['luapak.merger'] = 'luapak/merger.lua',
     ['luapak.minifier'] = 'luapak/minifier.lua',

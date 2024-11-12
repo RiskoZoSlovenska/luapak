@@ -24,13 +24,6 @@ if [ -d "$VENV_DIR"/luarocks/lua ]; then
 		&& luarocks_path="$(cygpath -w "$VENV_DIR/luarocks/lua")\\?.lua" \
 		|| luarocks_path="$VENV_DIR/luarocks/lua/?.lua"
 	export LUA_PATH="${LUA_PATH:+"$LUA_PATH;"}$luarocks_path;;"
-
-	# XXX: https://github.com/luarocks/luarocks/pull/709
-	site_config="$VENV_DIR/luarocks/share/lua/$(lua_version)/luarocks/site_config.lua"
-	if [ ! -f "$site_config" ]; then
-		mkdir -p "${site_config%/*}"
-		echo 'return {}' > "$site_config"
-	fi
 fi
 
 opts=''
