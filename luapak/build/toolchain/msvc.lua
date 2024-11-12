@@ -25,7 +25,7 @@ function M.compile_object (vars, obj_file, source_file, defines, incdirs)
                  '-Fo'..obj_file,
                  '-I'..vars.LUA_INCDIR,
                  source_file,
-                 unpack(push_flags))
+                 unpack(extra))
 end
 
 function M.create_static_lib (vars, out_file, objects)
