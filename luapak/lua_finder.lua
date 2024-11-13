@@ -18,6 +18,11 @@ local read_file = fs.read_file
 local starts_with = utils.starts_with
 
 
+local default_bin_dirs = {
+  luarocks.get_variable('LUA_BINDIR') or '',
+  'vendor/lua', 'deps/lua', '/usr/local/bin', '/usr/bin'
+}
+
 local default_include_dirs = {
   luarocks.get_variable('LUA_INCDIR') or '',
   'vendor/lua', 'deps/lua', '/usr/local/include', '/usr/include'
@@ -64,6 +69,20 @@ end
 
 
 local M = {}
+
+
+function M.lua_version(filename, ver)
+  local content, err = read_file(filename)
+  if not content then
+    return nil, err
+  end
+
+  return ver -- TODO: Proper check
+end
+local lua_version = M.lua_version
+
+-- TODO: Implement M.luajit_version
+local luajit_version = M.lua_version
 
 --- Parses version number from the given Lua library using @{find_string_in_binary}.
 --
@@ -129,6 +148,36 @@ function M.luajith_version (filename)
   return fmt('%s.%s.%s', x, y, z)
 end
 local luajith_version = M.luajith_version
+
+
+function M.find_lua (lua_name, lua_ver, dirs)
+  check_args('?string, ?string, ?table', lua_name, lua_ver, dirs)
+  lua_name = lua_name or 'lua'
+
+  local existing = luarocks.get_variable('LUA')
+  if existing then
+    return existing
+  end
+
+  local version_check = (lua_name == "luajit") and luajit_version or lua_version
+  local major, minor = (lua_ver or ''):match('^(%d+)%.(%d+)')
+  local suffixes = (major and minor)
+      and { "", major .. minor, major .. "." .. minor }
+      or { "" }
+
+  for _, dir in ipairs(dirs or default_bin_dirs) do
+    for _, suffix in ipairs(suffixes) do
+      for _, extension in ipairs({"", ".exe"}) do
+        local path = dir .. "/" .. lua_name .. suffix .. extension
+        local found_ver = version_check(path, lua_ver)
+
+        if found_ver and (lua_ver == nil or starts_with(lua_ver, found_ver)) then
+          return path, found_ver
+        end
+      end
+    end
+  end
+end
 
 --- Looking for a directory containing Lua header file `lua_name` in common locations.
 --

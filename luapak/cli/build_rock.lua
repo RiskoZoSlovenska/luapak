@@ -9,6 +9,7 @@ local optparse = require 'luapak.optparse'
 local utils = require 'luapak.utils'
 
 local errorf = utils.errorf
+local find_lua = lua_finder.find_lua
 local find_incdir = lua_finder.find_incdir
 local fmt = string.format
 local is_file = fs.is_file
@@ -32,6 +33,13 @@ Options:
   -i, --lua-impl=NAME         The Lua implementation that should be used - "PUC" (default), or
                               "LuaJIT". This is currently used only as a hint to find the correct
                               headers when auto-detection is used (i.e. --lua-incdir unspecified).
+
+  --lua=FILE                  The path to the Lua or LuaJIT interpreter/executable. If not
+                              specified, luapak will check if Luarocks has LUA set. If not, it
+                              will search: Luarock's LUA_BINDIR, ./vendor/lua, ./deps/lua,
+                              /usr/local/bin, and /usr/bin. If --lua-version is specified, then
+                              it will look for binaries suffixed by XY or X.Y, where X and Y
+                              are the major and minor Lua versions respectively.
 
   -I, --lua-incdir=DIR        The directory that contains Lua (or LuaJIT) headers. If not
                               specified, luapak will look for the lua.h (and luajit.h) file inside:
@@ -84,12 +92,25 @@ return function (arg)
     optparser:opterr(fmt('--lua-impl="%s" is invalid, must be "PUC", or "LuaJIT"', opts.lua_impl))
   end
 
+  local lua = opts.lua
   local lua_incdir = opts.lua_incdir
   local lua_name = opts.lua_impl:lower() == 'luajit' and 'LuaJIT' or 'Lua'
   local lua_ver = opts.lua_version
 
   luarocks.set_link_static(true)
   luarocks.use_tree(opts.rocks_tree)
+
+  if lua then
+    if not is_file(lua) then
+      errorf("Cannot find the Lua interpreter in %s!", lua)
+    end
+  else
+    lua = find_lua(lua_name:lower(), lua_ver)
+    if not lua then
+      errorf("Cannot find the %s %s interpreter. Please specify --lua=FILE", lua_name, lua_ver or '')
+    end
+  end
+  luarocks.set_variable('LUA', lua)
 
   if lua_incdir then
     if not is_file(lua_incdir..'/lua.h') then

@@ -112,6 +112,4 @@ for name, _ in pairs(cfg.variables) do
   end
 end
 
-print("------------------- Lua is:", cfg.variables.LUA)
-
 return cfg

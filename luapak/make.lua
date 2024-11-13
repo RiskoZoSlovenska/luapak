@@ -23,6 +23,7 @@ local is_dir = fs.is_dir
 local is_file = fs.is_file
 local ends_with = utils.ends_with
 local errorf = utils.errorf
+local find_lua = lua_finder.find_lua
 local find_incdir = lua_finder.find_incdir
 local find_liblua = lua_finder.find_liblua
 local luah_version = lua_finder.luah_version
@@ -269,6 +270,7 @@ return function (proj_paths, entry_script, output_file, rocks_dir, opts)
   rocks_dir = rocks_dir or '.luapak'
   opts = opts or {}
 
+  local lua = opts.lua
   local lua_lib = opts.lua_lib
   local lua_incdir = opts.lua_incdir
   local lua_name = opts.lua_impl == 'luajit' and 'LuaJIT' or 'Lua'
@@ -298,6 +300,19 @@ return function (proj_paths, entry_script, output_file, rocks_dir, opts)
   if is_dir(output_file) then
     errorf('Cannot create file "%s", because it is a directory', output_file)
   end
+
+  if lua then
+    if not is_file(lua) then
+      errorf("Cannot find the Lua interpreter in %s!", lua)
+    end
+  else
+    lua = find_lua(lua_name:lower(), lua_ver)
+    if not lua then
+      errorf("Cannot find the %s %s interpreter. Please specify --lua=FILE", lua_name, lua_ver or '')
+    end
+    log.debug('Using %s %s interpreter: %s', lua_name, lua_ver or '', lua)
+  end
+  luarocks.set_variable('LUA', lua)
 
   if lua_incdir then
     if not is_file(lua_incdir..'/lua.h') then

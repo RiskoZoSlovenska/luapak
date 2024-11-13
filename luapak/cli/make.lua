@@ -56,6 +56,13 @@ Options:
                                   correct library and headers when auto-detection is used
                                   (i.e. --lua-incdir or --lua-lib is not specified).
 
+      --lua=FILE                  The path to the Lua or LuaJIT interpreter/executable. If not
+                                  specified, luapak will check if Luarocks has LUA set. If not, it
+                                  will search: Luarock's LUA_BINDIR, ./vendor/lua, ./deps/lua,
+                                  /usr/local/bin, and /usr/bin. If --lua-version is specified, then
+                                  it will look for binaries suffixed by XY or X.Y, where X and Y
+                                  are the major and minor Lua versions respectively.
+
       --lua-incdir=DIR            The directory that contains Lua (or LuaJIT) headers. If not
                                   specified, luapak will look for the lua.h (and luajit.h) file
                                   inside: Luarock's LUA_INCDIR, ./vendor/lua, ./deps/lua,
@@ -136,6 +143,7 @@ return function (arg)
     debug = opts.debug,
     exclude_modules = split_repeated_option(opts.exclude_modules),
     extra_modules = split_repeated_option(opts.include_modules),
+    lua = opts.lua,
     lua_impl = opts.lua_impl:lower(),
     lua_incdir = opts.lua_incdir,
     lua_lib = opts.lua_lib,
