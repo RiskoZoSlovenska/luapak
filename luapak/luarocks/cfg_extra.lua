@@ -66,11 +66,12 @@ if not cfg.variables.LUALIB and not MSVC then
                                             cfg.lib_extension)
 end
 
-if package.loaded.jit and not cfg.luajit_version then
-  cfg.luajit_version = package.loaded.jit.version:match('LuaJIT (%d+%.%d+%.%d+)')
+if package.loaded.jit and not cfg.cache.luajit_version then
+  cfg.cache.luajit_version = package.loaded.jit.version:match('LuaJIT (%d+%.%d+%.%d+)')
+  cfg.cache.luajit_version_checked = true
 end
 
-if cfg.is_platform('macosx') and cfg.luajit_version then
+if cfg.is_platform('macosx') and cfg.cache.luajit_version then
   cfg.variables.LDFLAGS = const.LUAJIT_MACOS_LDFLAGS
 end
 
@@ -110,5 +111,7 @@ for name, _ in pairs(cfg.variables) do
     cfg.variables[name] = value
   end
 end
+
+print("------------------- Lua is:", cfg.variables.LUA)
 
 return cfg
