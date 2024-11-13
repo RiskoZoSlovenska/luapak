@@ -38,12 +38,23 @@ function M.create_shared_lib (vars, so_file, objects, libs, libdirs)  --luacheck
   error 'Not implemented yet'  -- TODO
 end
 
-function M.link_binary (vars, out_file, objects, libs, libdirs)  --luacheck: ignore
-  error 'Not implemented yet'  -- TODO
+function M.link_binary (vars, out_file, objects, libs, libdirs)
+  check_args('?table, string, table, table|string|nil, table|string|nil',
+             vars, out_file, objects, libs, libdirs)
+
+  local extra = { unpack(objects) }
+
+  push_flags(extra, '-libpath:%s', libdirs, vars)
+
+  return execute(vars.LD..' '..(vars.LDFLAGS or ''),
+                 '-out:' .. out_file,
+                 unpack(extra))
 end
 
-function M.strip (vars, bin_file)  --luacheck: ignore
-  error 'Not implemented yet'  -- TODO
+function M.strip (vars, bin_file)
+  check_args('?table, string', vars, bin_file)
+
+  return execute(vars.STRIP, bin_file)
 end
 
 return M
